@@ -156,6 +156,7 @@ When adding/making changes to a component, always make sure your code is tested:
 ## Development
 
 - run npm install
+- run npm run build
 - run npm run start to build and start the development server
 
 ## Testing and Linting
