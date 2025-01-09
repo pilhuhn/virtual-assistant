@@ -123,7 +123,7 @@ export const OllamaChatbotDemo: React.FunctionComponent = () => {
   const [chatbotVisible, setChatbotVisible] = React.useState<boolean>(true);
   const [displayMode, setDisplayMode] = React.useState<ChatbotDisplayMode>(ChatbotDisplayMode.default);
   const [messages, setMessages] = React.useState<MessageProps[]>(initialMessages);
-  const [selectedModel, setSelectedModel] = React.useState<string>();
+  const [selectedModel, setSelectedModel] = React.useState<string>('');
   const [isSendButtonDisabled, setIsSendButtonDisabled] = React.useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const [conversations, setConversations] = React.useState<Conversation[] | { [key: string]: Conversation[] }>(
