@@ -55,10 +55,6 @@ const footnoteProps = {
   }
 };
 
-// It's important to set a date and timestamp prop since the Message components re-render.
-// The timestamps re-render with them.
-const date = new Date();
-
 const ollamaServerBaseUrl = 'http://127.0.0.1:11434';
 
 const initialMessages: MessageProps[] = [];
@@ -172,6 +168,7 @@ export const OllamaChatbotDemo: React.FunctionComponent = () => {
       messages: mjson
     };
 
+    // eslint-disable-next-line no-console
     console.log('==> Sending ' + JSON.stringify(q));
 
     const val = fetch(ollamaServerBaseUrl + '/api/chat', {
@@ -180,7 +177,24 @@ export const OllamaChatbotDemo: React.FunctionComponent = () => {
     })
       .then((resp) => resp.json())
       .then((json) => {
-        const oo: OllamaChatResponse = Object.assign({}, json);
+        let oo: OllamaChatResponse;
+        // See if we get an error back and return that to the user
+        if (json.error != null) {
+          oo = {
+            done: 'true',
+            // eslint-disable-next-line camelcase
+            eval_count: -1,
+            message: {
+              role: 'bot',
+              content: 'I am sorry: ' + json.error
+            },
+            // eslint-disable-next-line camelcase
+            prompt_eval_count: -1
+          };
+        } else {
+          oo = Object.assign({}, json);
+        }
+        // eslint-disable-next-line no-console
         console.log('<== Received ' + JSON.stringify(oo));
         return oo;
       });
@@ -252,6 +266,7 @@ export const OllamaChatbotDemo: React.FunctionComponent = () => {
       .filter((item) => typeof item === 'string')
       .map((item) => item);
 
+    // eslint-disable-next-line no-console
     console.log('Messages sent' + JSON.stringify(messagesToSendToLLM));
     const response = getResponseFromLLM(messagesToSendToLLM);
     setMessages(newMessages);
