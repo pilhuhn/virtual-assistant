@@ -56,6 +56,8 @@ import PFIconLogoReverse from '../UI/PF-IconLogo-Reverse.svg';
 import userAvatar from '../Messages/user_avatar.svg';
 import patternflyAvatar from '../Messages/patternfly_avatar.jpg';
 
+import useWebSocket, { ReadyState } from 'react-use-websocket';
+
 ### Basic ChatBot
 
 This demo displays a basic ChatBot, which includes:

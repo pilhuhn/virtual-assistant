@@ -2,6 +2,8 @@ import React from 'react';
 
 import { Bullseye, Brand, DropdownList, DropdownItem, DropdownGroup, SkipToContent } from '@patternfly/react-core';
 
+import useWebSocket, { ReadyState } from 'react-use-websocket';
+
 import ChatbotToggle from '@patternfly/chatbot/dist/dynamic/ChatbotToggle';
 import Chatbot, { ChatbotDisplayMode } from '@patternfly/chatbot/dist/dynamic/Chatbot';
 import ChatbotContent from '@patternfly/chatbot/dist/dynamic/ChatbotContent';
@@ -95,37 +97,7 @@ export default MessageLoading;
 // The timestamps re-render with them.
 const date = new Date();
 
-const initialMessages: MessageProps[] = [
-  {
-    id: '1',
-    role: 'user',
-    content: 'Hello, can you give me an example of what you can do?',
-    name: 'User',
-    avatar: userAvatar,
-    timestamp: date.toLocaleString(),
-    avatarProps: { isBordered: true }
-  },
-  {
-    id: '2',
-    role: 'bot',
-    content: markdown,
-    name: 'Bot',
-    avatar: patternflyAvatar,
-    timestamp: date.toLocaleString(),
-    actions: {
-      // eslint-disable-next-line no-console
-      positive: { onClick: () => console.log('Good response') },
-      // eslint-disable-next-line no-console
-      negative: { onClick: () => console.log('Bad response') },
-      // eslint-disable-next-line no-console
-      copy: { onClick: () => console.log('Copy') },
-      // eslint-disable-next-line no-console
-      share: { onClick: () => console.log('Share') },
-      // eslint-disable-next-line no-console
-      listen: { onClick: () => console.log('Listen') }
-    }
-  }
-];
+const initialMessages: MessageProps[] = [];
 
 const welcomePrompts = [
   {
@@ -180,13 +152,37 @@ export const ChatbotDemo: React.FunctionComponent = () => {
   const chatbotRef = React.useRef<HTMLDivElement>(null);
   const historyRef = React.useRef<HTMLButtonElement>(null);
 
-  // Autu-scrolls to the latest message
+  const WS_URL = 'ws://127.0.0.1:8080/websocket';
+  const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(WS_URL, {
+    share: false,
+    shouldReconnect: () => true
+  });
+
+  // Auto-scrolls to the latest message
   React.useEffect(() => {
     // don't scroll the first load - in this demo, we know we start with two messages
     if (messages.length > 2) {
       scrollToBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  React.useEffect(() => {
+    console.log('Connection state changed');
+    if (readyState === ReadyState.OPEN) {
+      sendJsonMessage({
+        event: 'subscribe',
+        data: {
+          channel: 'general-chatroom'
+        }
+      });
+    }
+  }, [readyState]);
+
+  // Run when a new WebSocket message is received (lastJsonMessage)
+  React.useEffect(() => {
+    console.log(`Got a new message: ${lastJsonMessage.choices}`);
+
+  }, [lastJsonMessage]);
 
   const onSelectModel = (
     _event: React.MouseEvent<Element, MouseEvent> | undefined,
@@ -226,6 +222,7 @@ export const ChatbotDemo: React.FunctionComponent = () => {
       timestamp: date.toLocaleString(),
       avatarProps: { isBordered: true }
     });
+    sendJsonMessage({ event: 'message', data: message });
     newMessages.push({
       id: generateId(),
       role: 'bot',
@@ -441,9 +438,9 @@ export const ChatbotDemo: React.FunctionComponent = () => {
                     prompts={welcomePrompts}
                   />
                   {/* This code block enables scrolling to the top of the last message.
-                  You can instead choose to move the div with scrollToBottomRef on it below 
+                  You can instead choose to move the div with scrollToBottomRef on it below
                   the map of messages, so that users are forced to scroll to the bottom.
-                  If you are using streaming, you will want to take a different approach; 
+                  If you are using streaming, you will want to take a different approach;
                   see: https://github.com/patternfly/chatbot/issues/201#issuecomment-2400725173 */}
                   {messages.map((message, index) => {
                     if (index === messages.length - 1) {
