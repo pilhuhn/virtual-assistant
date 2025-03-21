@@ -6,11 +6,9 @@ import { InitProps, TrackingSpi } from './tracking_spi';
 export class SegmentTrackingProvider implements TrackingSpi, TrackingApi {
   private analytics: AnalyticsBrowser | undefined;
   private verbose = false;
-  getKey(): string {
-    return 'segmentKey';
-  }
 
   initialize(props: InitProps): void {
+    this.verbose = props.verbose;
     if (this.verbose) {
       // eslint-disable-next-line no-console
       console.log('SegmentProvider initialize');
@@ -35,20 +33,20 @@ export class SegmentTrackingProvider implements TrackingSpi, TrackingApi {
     );
   }
 
-  identify(userID: string): void {
+  identify(userID: string, userProperties: TrackingEventProperties = {}): void {
     if (this.verbose) {
       // eslint-disable-next-line no-console
       console.log('SegmentProvider userID: ' + userID);
     }
     if (this.analytics) {
-      this.analytics.identify(userID);
+      this.analytics.identify(userID, userProperties);
     }
   }
 
   trackPageView(url: string | undefined): void {
     if (this.verbose) {
       // eslint-disable-next-line no-console
-      console.log('SegmentProvider url', url);
+      console.log('SegmentProvider url ', url);
     }
     if (this.analytics) {
       if (url) {
@@ -62,7 +60,7 @@ export class SegmentTrackingProvider implements TrackingSpi, TrackingApi {
   trackSingleItem(item: string, properties?: TrackingEventProperties): void {
     if (this.verbose) {
       // eslint-disable-next-line no-console
-      console.log('SegmentProvider: trackSingleItem' + item, properties);
+      console.log('SegmentProvider: trackSingleItem ' + item, properties);
     }
     if (this.analytics) {
       this.analytics.track(item, { properties });

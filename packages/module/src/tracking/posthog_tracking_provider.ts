@@ -5,11 +5,9 @@ import { InitProps, TrackingSpi } from './tracking_spi';
 
 export class PosthogTrackingProvider implements TrackingSpi, TrackingApi {
   private verbose = false;
-  getKey(): string {
-    return 'posthogKey';
-  }
 
   initialize(props: InitProps): void {
+    this.verbose = props.verbose;
     if (this.verbose) {
       // eslint-disable-next-line no-console
       console.log('PosthogProvider initialize');
@@ -24,18 +22,18 @@ export class PosthogTrackingProvider implements TrackingSpi, TrackingApi {
     });
   }
 
-  identify(userID: string): void {
+  identify(userID: string, userProperties: TrackingEventProperties = {}): void {
     if (this.verbose) {
       // eslint-disable-next-line no-console
       console.log('PosthogProvider userID: ' + userID);
     }
-    posthog.identify(userID);
+    posthog.identify(userID, userProperties);
   }
 
   trackPageView(url: string | undefined): void {
     if (this.verbose) {
       // eslint-disable-next-line no-console
-      console.log('PostHogProvider url', url);
+      console.log('PostHogProvider url ', url);
     }
     // TODO posthog seems to record that automatically.
     //  How to not clash with this here? Just leave as no-op?
@@ -44,7 +42,7 @@ export class PosthogTrackingProvider implements TrackingSpi, TrackingApi {
   trackSingleItem(item: string, properties?: TrackingEventProperties): void {
     if (this.verbose) {
       // eslint-disable-next-line no-console
-      console.log('PosthogProvider: trackSingleItem' + item, properties);
+      console.log('PosthogProvider: trackSingleItem ' + item, properties);
     }
     posthog.capture(item, { properties });
   }

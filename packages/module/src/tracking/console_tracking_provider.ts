@@ -1,4 +1,4 @@
-import { TrackingSpi } from './tracking_spi';
+import { InitProps, TrackingSpi } from './tracking_spi';
 import { TrackingApi, TrackingEventProperties } from './tracking_api';
 
 export class ConsoleTrackingProvider implements TrackingSpi, TrackingApi {
@@ -9,20 +9,19 @@ export class ConsoleTrackingProvider implements TrackingSpi, TrackingApi {
       console.log('ConsoleProvider pageView ', url);
     }
   }
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  registerProvider(): void {}
 
-  initialize(): void {
+  initialize(props: InitProps): void {
+    this.verbose = props.verbose;
     if (this.verbose) {
       // eslint-disable-next-line no-console
       console.log('ConsoleProvider initialize');
     }
   }
 
-  identify(userID: string): void {
+  identify(userID: string, userProperties: TrackingEventProperties = {}): void {
     if (this.verbose) {
       // eslint-disable-next-line no-console
-      console.log('ConsoleProvider identify ', userID);
+      console.log('ConsoleProvider identify ', userID, userProperties);
     }
   }
 
@@ -31,9 +30,5 @@ export class ConsoleTrackingProvider implements TrackingSpi, TrackingApi {
       // eslint-disable-next-line no-console
       console.log('ConsoleProvider: ' + item, properties);
     }
-  }
-
-  getKey(): string {
-    return 'console';
   }
 }
